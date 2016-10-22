@@ -1,9 +1,8 @@
 Python Wrapper for the Oanda fxTrade Platform (REST-v20 API)
   - http://developer.oanda.com/rest-live-v20/introduction/
 
-all packages used (except talib) are included in the Anaconda distribution of Python 3.5:
+all packages used are included in the Anaconda distribution of Python 3.5:
   - https://docs.continuum.io/anaconda/
-  - see below for how to install ta-lib for the technical analysis component of this module
 
 to install oanda_fx_api:
 
@@ -12,27 +11,27 @@ to install oanda_fx_api:
   
 dependencies:
   - pandas
-  - numpy
   - statsmodels
-  - ta-lib:
-    - if you do not have this package already, you will need to build the underlying c from source:
-    - http://prdownloads.sourceforge.net/ta-lib/
-    - (untar and cd, ./configure, then make && sudo make install)
-    - then you can pip install TA-Lib or git clone https://github.com/mrjbq7/ta-lib to install
+  - bokeh
 
 examples in IPython:
   
-    >> from oanda_api_fx.util import GetCandles
-    >> candles = GetCandles(1250, 'EUR_USD', 'S5').request()
-    >> candles['closeMid'].plot()
+    >> import oanda_fx_api as ofx
 
-    >> from oanda_api_fx.util import StreamPrices
-    >> stream = StreamPrices('EUR_USD')
-    >> stream.prices()
+    >> symbol = 'EUR_USD'
+
+    >> acc = ofx.Account()
+    >> candles = ofx.GetCandles(acc, symbol).request()
+
+    >> entry_price = candles.iloc[-1]['closeAsk']
+    >> exit_price = candles.iloc[-1]['closeBid']
  
-    >> from oanda_api_fx.util import Signals, OrderHandler
-    >> tick = Signals(1250, 'EUR_USD', 900, 450).tick
-    >> OrderHandler('EUR_USD', tick, 'BUY', 1000000).send_order()
+    >> entry_order = OrderHandler(acc, 'buy', 100000, symbol, entry_price)
+    >> order = pre_order.send_order()
  
-    >> from oanda_api_fx.util import Positions
-    >> position = Positions().checkPosition('EUR_USD')
+    >> position = ofx.Positions(acc, symbol).get_position()
+
+    >> exit_order = OrderHandler(acc, 'sell', 100000, symbol, exit_price)
+    >> order = pre_order.send_order()
+
+    >> position = ofx.Positions(acc, symbol).get_position()
