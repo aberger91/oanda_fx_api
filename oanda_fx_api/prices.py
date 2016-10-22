@@ -49,7 +49,8 @@ class GetCandles(object):
 
     def request(self):
         try:
-            req = requests.get(self.account.candles_venue, headers=self.account.headers, params=self.params).json()
+            req = requests.get(self.account.candles_venue, 
+                               headers=self.account.headers, params=self.params).json()
         except Exception as e:
             print('%s\n>>> Error: No candles in JSON response:' % e)
             return False
@@ -58,5 +59,5 @@ class GetCandles(object):
         candles.index = candles["time"].map(lambda x: dt.datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%fZ"))
         
         for x in ['open', 'high', 'low', 'close']:
-            candles['%sMid' % x] = (candles['%sAsk' % x] + candles['%sBid' % x]) / 2
+            candles['%s_mid' % x] = (candles['%sAsk' % x] + candles['%sBid' % x]) / 2
         return candles

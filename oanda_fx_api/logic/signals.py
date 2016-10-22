@@ -14,10 +14,10 @@ class Compute(GetCandles):
         self.candles =      self.request()
         self.long_win =     long_win
         self.short_win =    short_win
-        self._open =        self.candles["openMid"]
-        self.high =         self.candles["highMid"]
-        self.low =          self.candles["lowMid"]
-        self.close =        self.candles["closeMid"]
+        self._open =        self.candles["open_mid"]
+        self.high =         self.candles["high_mid"]
+        self.low =          self.candles["low_mid"]
+        self.close =        self.candles["close_mid"]
         self.candles["total_volume"] = self.candles["volume"].sum()
         self.moving_average()
         self.stoch_osc()
@@ -34,7 +34,7 @@ class Compute(GetCandles):
         return Tick(self.candles.ix[self.candles.iloc[-1]])
                             
     def adf_test(self):
-        test = ts.adfuller(self.candles["closeMid"], maxlag=1)
+        test = ts.adfuller(self.candles["close_mid"], maxlag=1)
         adf_crit = test[4]
         self.candles["ADF_1"] = adf_crit["1%"]
         self.candles["ADF_5"] = adf_crit["5%"]
@@ -90,9 +90,9 @@ class Signals(Compute):
         return channel, stoch
 
     def bband_signals(self):
-        if self.tick.closeMid > self.tick.upper:
+        if self.tick.close_mid > self.tick.upper:
             channel = 1
-        elif self.tick.closeMid < self.tick.lower:
+        elif self.tick.close_mid < self.tick.lower:
             channel = -1
         else:
             channel = 0
