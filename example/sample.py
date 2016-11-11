@@ -1,4 +1,5 @@
 import oanda_fx_api as ofx
+<<<<<<< HEAD
 import datetime as dt
                             
 symbol = 'EUR_USD'
@@ -18,3 +19,13 @@ id = working_orders[0]['id']
 
 order.delete(id)
 print(order.working())
+=======
+                            
+symbol = 'EUR_USD'
+
+acc = ofx.Account()
+dat = ofx.GetCandles(acc, symbol).request()
+
+print(dat[['closeBid', 'closeAsk']].head())
+print(dat.columns)
+>>>>>>> 334ed19e6a5f9be758fd974ee3f5c16d0936ec57

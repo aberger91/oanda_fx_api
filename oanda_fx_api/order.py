@@ -51,18 +51,22 @@ class Orders:
 
                 
 class MostRecentOrder(Orders):
-    """
-    Limit Orders --> response from Oanda POST
-    """
-    def __init__(self, account, order):
-        self.account =      account
-        self.price =        order["price"]
-        self.instrument =   order["instrument"]
-        self.side =         order["orderOpened"]["side"]
-        self.id =           order["orderOpened"]["id"]
-        self.units =        order["orderOpened"]["units"]
-        self.expiry =       order["orderOpened"]["expiry"]
-        self.reject =       False
+    def working(self):
+        try:
+            resp = requests.get(self.account.orders,
+                                headers=self.account.headers, 
+                                verify=False).json()
+            return resp
+        except Exception as e:
+            raise ValueError(">>> Caught exception retrieving orders: %s"%e)
+
+    def delete(self):
+        try:
+            resp = requests.request("DELETE", self.account.orders, 
+                                    headers=self.account.headers, verify=False).json()
+            return resp
+        except Exception as e:
+                raise ValueError(">>> Caught exception retrieving orders: %s"%e)
 
 
 class MostRecentReject:
