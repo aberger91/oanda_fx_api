@@ -1,0 +1,1 @@
+from oanda_fx_api.logic.signals import Compute, Signals
