@@ -14,7 +14,8 @@ class Account:
         
         self.orders =  self._id_url + '/orders/'
         self.positions = self._id_url + "/positions/"
-        self.headers = {'Authorization': 'Bearer %s' % self.token}
+        self.headers = {'Authorization': 'Bearer %s' % self.token,
+                        'X-Accept-Datetime-Format': 'UNIX'}
 
     def __str__(self):
         return "[=> %s (%s)" % (self.venue, self.id)

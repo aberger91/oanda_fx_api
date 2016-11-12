@@ -3,20 +3,54 @@ import datetime as dt
 from oanda_fx_api.config import Paths
 
 
-class MostRecentOrder:
-    """
-    Limit Orders --> response from Oanda POST
-    """
-    def __init__(self, account, order):
-        self.account =      account
-        self.price =        order["price"]
-        self.instrument =   order["instrument"]
-        self.side =         order["orderOpened"]["side"]
-        self.id =           order["orderOpened"]["id"]
-        self.units =        order["orderOpened"]["units"]
-        self.expiry =       order["orderOpened"]["expiry"]
-        self.reject =       False
+class Orders:
+    def __init__(self, account):
+        self.account = account
+        self.params = {}
+    
+    def working(self):
+        try:
+            resp = requests.get(self.account.orders,
+                                headers=self.account.headers, 
+                                verify=False).json()
+            resp = resp['orders']
+        except Exception as e:
+            raise ValueError(">>> Error: Caught exception retrieving orders: %s" % e)
+        return resp
+            
+    def delete(self, id):
+        try:
+            resp = requests.request("DELETE", 
+                                    self.account.orders + str(id), 
+                                    headers=self.account.headers, 
+                                    verify=False).json()
+            return resp
+        except Exception as e:
+            raise ValueError(">>> Error: Caught exception deleting order: %s" % e)
+            
+    def get(self, id):
+        try:
+            resp = requests.get(self.account.orders + str(id),
+                                headers=self.account.headers, 
+                                verify=False).json()
+        except Exception as e:
+            raise ValueError(">>> Error: Caught exception retrieving order: %s" % e)
+        return resp
+        
+    def update(self, id, param, value):
+        try:
+            self.params[param] = value
+            resp = requests.request("PATCH", 
+                                    self.account.orders + str(id),
+                                    headers=self.account.headers, 
+                                    data=self.params,
+                                    verify=False).json()
+        except Exception as e:
+            raise ValueError(">>> Error: Caught exception updating order: %s" % e)
+        return resp
 
+                
+class MostRecentOrder(Orders):
     def working(self):
         try:
             resp = requests.get(self.account.orders,
@@ -64,7 +98,7 @@ class MostRecentTrade:
 
     def _trade(self):
         if "tradesClosed" in self.order and self.order["tradesClosed"]:
-            self.time = dt.datetime.strptime(self.order["time"], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
+            self.time = dt.datetime.fromtimestamp(int(self.order['time'])/1000000)
             try:
                 self.side =         self.order["tradesClosed"][0]["side"]
                 self.id =           self.order["tradesClosed"][0]["id"]
@@ -73,10 +107,10 @@ class MostRecentTrade:
                 self.price =        self.order["price"]
                 return True
             except KeyError as e:
-                print("Caught exception in closed_trade\n%s"%e)
+                print(">>> Error: Caught exception in closed_trade\n%s" % e)
 
         elif "tradeOpened" in self.order and self.order["tradeOpened"]:
-            self.time = dt.datetime.strptime(self.order["time"], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
+            self.time = dt.datetime.fromtimestamp(int(self.order['time'])/1000000)
             try:
                 self.side =         self.order["tradeOpened"]["side"]
                 self.id =           self.order["tradeOpened"]["id"]
@@ -85,25 +119,27 @@ class MostRecentTrade:
                 self.price =        self.order["price"]
                 return True
             except KeyError as e:
-                print("Caught exception in opened_trade\n%s"%e)
+                print(">>> Error: Caught exception in opened_trade\n%s" % e)
         return False
 
     def __repr__(self):
         return str(self.order)
 
 
-class OrderHandler:
+class OrderHandler(Orders):
     def __init__(self, account, side, 
-                 quantity, symbol, price, kind="market"):
+                 quantity, symbol, price, 
+                 kind="market", duration=0):
         self.account =  account
         self.side =     side
         self.quantity = quantity
         self.symbol =   symbol
         self.kind =     kind
         self.price =    price
+        self.duration = dt.timedelta(seconds=duration)
         
-    def expiry(self, duration):
-        return str(int(dt.datetime.utcnow().timestamp()) + duration)
+    def expiry(self):
+        return str(int((dt.datetime.utcnow() + self.duration).timestamp()))
 
     def market_order(self):
         params = {'instrument': self.symbol,
@@ -115,25 +151,26 @@ class OrderHandler:
                   "lowerBound": self.price - 0.00005}
         return params
 
-    def limit_order(self, duration):
+    def limit_order(self):
         '''
         duration: int (seconds)
         '''
-        self.headers["X-Accept-Datetime-Format"] = "UNIX"
         params = {'instrument': self.symbol,
                   'side':       self.side,
                   'type':       self.kind,
                   'units':      self.quantity,
                   "price":      self.price,
-                  "expiry":     self.expiry(duration)}
+                  "expiry":     self.expiry()}
         return params
 
     def _send_order(self):
         params = self.market_order() if self.kind == 'market' else self.limit_order()
         try:
-            resp = requests.post(self.account.orders, headers=self.account.headers, data=params, verify=False).json()
+            resp = requests.post(self.account.orders, 
+                                 headers=self.account.headers, 
+                                 data=params, verify=False).json()
         except Exception as e:
-            print(">>> Caught exception sending order\n%s" % e)
+            print(">>> Error: Caught exception sending order\n%s" % e)
             return False
         return resp, params
 
@@ -143,14 +180,14 @@ class OrderHandler:
             if "tradeOpened" in order.keys():
                 order = MostRecentTrade(order)
             elif "orderOpened" in order.keys():
-                order = MostRecentOrder(order)
+                order = MostRecentOrder(self.account, order)
             elif "code" in order.keys():
-                if order["code"] == 23 or order["code"] == 22:
+                if order["code"] in [22, 23]:
                     order = MostRecentReject(order, params)
                     print(order)
                 else:
                     print(order)
-                    raise NotImplementedError("order[\'code\'] not an integer or != 23 or 22")
+                    raise NotImplementedError(">>> Error: order[\'code\'] not an integer or != 23 or 22")
             return order
         else:
             print("%s Order not done\n" % order)

@@ -11,27 +11,20 @@ to install oanda_fx_api:
   
 dependencies:
   - pandas
-  - statsmodels
+  - numpy
   - bokeh
+  - statsmodels
 
 examples in IPython:
   
     >> import oanda_fx_api as ofx
-
-    >> symbol = 'EUR_USD'
+    >> import datetime as dt
 
     >> acc = ofx.Account()
-    >> candles = ofx.GetCandles(acc, symbol).request()
 
-    >> entry_price = candles.iloc[-1]['closeAsk']
-    >> exit_price = candles.iloc[-1]['closeBid']
- 
-    >> entry_order = OrderHandler(acc, 'buy', 100000, symbol, entry_price)
-    >> order = pre_order.send_order()
- 
-    >> position = ofx.Positions(acc, symbol).get_position()
+    >> start = dt.datetime.now() - dt.timedelta(minutes=60)
+    >> candles = ofx.GetCandles(acc, 'EUR_USD', start=start).request()
+    >> candles['closeMid'].plot()
 
-    >> exit_order = OrderHandler(acc, 'sell', 100000, symbol, exit_price)
-    >> order = pre_order.send_order()
-
-    >> position = ofx.Positions(acc, symbol).get_position()
+    >> stream = ofx.StreamPrices('EUR_USD')
+    >> stream.prices()
