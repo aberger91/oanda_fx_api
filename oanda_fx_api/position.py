@@ -10,6 +10,7 @@ class PnL:
         self.ask = tick.closeAsk
         self.price = position.price
         self.units = position.units
+        self.position = position
 
     def get_pnl(self):
         if self.position.side:  # short = 1
