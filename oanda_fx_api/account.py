@@ -7,7 +7,7 @@ class Account:
         self.id = os.getenv('OANDA_FX_USER')  # account id
         self.token = os.getenv('OANDA_FX_KEY')
         
-        self.venue = Config.practice_venue  # api endpoint
+        self.venue = Config.fxtrade_venue  # api endpoint
         self.candles_venue = self.venue + "/v1/candles"
         self.streaming = Config.streaming_venue
         self._id_url = Config.account_url + self.id
