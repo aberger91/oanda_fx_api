@@ -21,4 +21,6 @@ class Account:
         return "[=> %s (%s)" % (self.venue, self.id)
 
     def __repr__(self):
+        print('Authenicating with: \nOANDA_FX_USER=%s and OANDA_FX_KEY=%s**********' % (
+              self.id, self.token[:4])) 
         return self.__str__()
