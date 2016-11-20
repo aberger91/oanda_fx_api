@@ -10,6 +10,7 @@ class PnL:
         self.ask = tick.closeAsk
         self.price = position.price
         self.units = position.units
+        self.position = position
 
     def get_pnl(self):
         if self.position.side:  # short = 1
@@ -25,7 +26,7 @@ class MostRecentPosition:
         self.units = units
 
     def __repr__(self):
-        return "SIDE: %s PRICE: %s UNITS: %s\n" % (
+        return "SIDE: %s PRICE: %s UNITS: %s" % (
                 self.side, np.mean(self.price), self.units)
 
 
@@ -44,6 +45,7 @@ class Positions:
             return False
 
         if "code" in req:
+            print(req)
             return False
         elif 'side' in req:
             side = 1 if req['side'] == 'sell' else 0
