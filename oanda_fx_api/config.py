@@ -15,6 +15,7 @@ class Paths:
 class Config:
     fxtrade_venue = "https://api-fxtrade.oanda.com"
     practice_venue = "https://api-fxpractice.oanda.com"
+    fxtrade_venue = "https://api-fxtrade.oanda.com"
     streaming_venue = "https://stream-fxpractice.oanda.com/v1/prices"
     account_url = "%s/v1/accounts/" % fxtrade_venue 
 
