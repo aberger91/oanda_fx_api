@@ -22,7 +22,6 @@ class Account:
         dat = requests.get(self._id_url, headers=self.headers).json()
         return dat
 
-
     def __str__(self):
         return "[=> %s (%s)" % (self.venue, self.id)
 
