@@ -18,7 +18,6 @@ class Config:
     streaming_practice_venue = "https://stream-fxpractice.oanda.com/v1/prices"
     fxtrade_venue = "https://api-fxtrade.oanda.com"
     streaming_venue = "https://stream-fxtrade.oanda.com/v1/prices"
-    account_url = "%s/v1/accounts/" % fxtrade_venue 
 
 
 class TradeModelError(Exception):
