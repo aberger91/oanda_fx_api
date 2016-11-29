@@ -1,1 +1,1 @@
-from oanda_fx_api.tools.risk import Risk
+from .risk import Risk
