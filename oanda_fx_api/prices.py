@@ -15,7 +15,9 @@ class StreamPrices(object):
                   "accountId":   self.account.id}
         try:
             s = requests.Session()
-            req = requests.Request("GET", self.account.streaming, headers=self.account.headers, params=params)
+            req = requests.Request("GET", self.account.streaming, 
+                                          headers=self.account.headers, 
+                                          params=params)
             pre = req.prepare()
             resp = s.send(pre, stream=True, verify=False)
         except Exception as e:

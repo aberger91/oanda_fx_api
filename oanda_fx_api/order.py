@@ -108,7 +108,6 @@ class MostRecentTrade:
                 return True
             except KeyError as e:
                 print(">>> Error: Caught exception in closed_trade\n%s" % e)
-
         elif "tradeOpened" in self.order and self.order["tradeOpened"]:
             self.time = dt.datetime.fromtimestamp(int(self.order['time'])/1000000)
             try:
@@ -147,7 +146,7 @@ class OrderHandler(Orders):
                   'type':       self.kind,
                   'units':      self.quantity,
                   "price":      self.price,
-                  "upperBound": self.price + 0.00005,
+                  "upperBound": self.price + 0.00005, # default
                   "lowerBound": self.price - 0.00005}
         return params
 

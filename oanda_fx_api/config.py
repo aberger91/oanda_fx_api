@@ -1,6 +1,7 @@
 import os
 
-class Paths:
+
+class Paths(object):
     HOME = os.getenv('HOME')
     LOG = "%s/tmp/" % HOME
 
@@ -12,13 +13,10 @@ class Paths:
         self.ticks = "%s/%s_tick" % (self.LOG, symbol)
 
 
-class Config:
-    fxtrade_venue = "https://api-fxtrade.oanda.com"
-    practice_venue = "https://api-fxpractice.oanda.com"
-    streaming_practice_venue = "https://stream-fxpractice.oanda.com/v1/prices"
-    fxtrade_venue = "https://api-fxtrade.oanda.com"
-    streaming_venue = "https://stream-fxtrade.oanda.com/v1/prices"
-
+class Config(object):
+    def __init__(self, mode):
+        venue = 'https://api-fx%s.oanda.com' % mode
+        streaming_venue = "https://stream-fx%s.oanda.com/v1/prices" % mode
 
 class TradeModelError(Exception):
     messages = {0: "Model not initialized.",
