@@ -15,8 +15,8 @@ class Paths(object):
 
 class Config(object):
     def __init__(self, mode):
-        venue = 'https://api-fx%s.oanda.com' % mode
-        streaming_venue = "https://stream-fx%s.oanda.com/v1/prices" % mode
+        self.venue = 'https://api-fx%s.oanda.com' % mode
+        self.streaming_venue = "https://stream-fx%s.oanda.com/v1/prices" % mode
 
 class TradeModelError(Exception):
     messages = {0: "Model not initialized.",

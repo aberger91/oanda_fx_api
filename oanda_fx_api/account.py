@@ -14,8 +14,8 @@ class Account:
         #
         
         #  Endpoints
-        self.candles_venue = self.venue + "/v1/candles"
-        self.account_url = "%s/v1/accounts/" % self.venue
+        self.candles_venue = self._config.venue + "/v1/candles"
+        self.account_url = "%s/v1/accounts/" % self._config.venue
         self.streaming = self._config.streaming_venue
 
         self._id_url = self.account_url + self.id
