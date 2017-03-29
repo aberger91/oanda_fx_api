@@ -48,7 +48,6 @@ class GetCandles(object):
         self.granularity =  granularity
         self.params =       self.parameters()
         
-                            
     def parameters(self):
         self.params =  {'instrument': self.symbol,
                         'granularity': self.granularity}
@@ -86,7 +85,6 @@ class GetCandles(object):
         start, end = candles.index[0], candles.index[-1]
         
         candles = pd.DataFrame(index=self.datetime_index(start=start, end=end)).join(candles, how='outer')
-        candles = candles.fillna(method='ffill')
         
         for x in ['open', 'high', 'low', 'close']:
             candles['%s_mid' % x] = (candles['%sAsk' % x] + candles['%sBid' % x]) / 2

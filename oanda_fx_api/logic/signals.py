@@ -12,6 +12,7 @@ class Compute(GetCandles):
         '''
         self.init(account, symbol)
         self.candles =      self.request()
+
         self.long_win =     long_win
         self.short_win =    short_win
         self._open =        self.candles["open_mid"]

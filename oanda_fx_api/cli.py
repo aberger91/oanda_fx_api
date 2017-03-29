@@ -2,6 +2,8 @@ from oanda_fx_api.account import Account
 from oanda_fx_api.prices import GetCandles, StreamPrices
 from oanda_fx_api.order import OrderHandler
 from oanda_fx_api.tools.risk import Risk
+from oanda_fx_api.charting import ohlc
+from bokeh.plotting import show
 import argparse
 
 
@@ -19,8 +21,13 @@ using the OANDA FX trading platform '''
                         required=False, 
                         type=str)
     parser.add_argument('-o', '--order', 
-                        nargs=4,
+                        nargs=3,
                         help='send an order', 
+                        required=False, 
+                        type=str)
+    parser.add_argument('-c', '--candles', 
+                        nargs=1,
+                        help='get FX candles', 
                         required=False, 
                         type=str)
     parser.add_argument('-s', '--summary', 
@@ -29,25 +36,33 @@ using the OANDA FX trading platform '''
                         required=False, 
                         type=str)
     args = parser.parse_args()
-    return args.prices, args.order, args.summary
+    return args.prices, args.order, args.candles, args.summary
 
 def main():
-    prices, order, summary = arguments()
-
+    prices, order, candles, summary = arguments()
     acc = Account()
+
     if prices:
-        ccy = prices[0]
-        prices = StreamPrices(acc, ccy).prices()
+        quotes = GetCandles(acc, prices[0], count=500).request()
+        print(quotes.tail())
+
     elif order:
-        side, amount, ccy, _type = order
+        side, amount, ccy = order
         quote = GetCandles(acc, ccy, count=1).request()
-        if side == 'buy':
-            _price = quote['closeAsk']
-        elif side == 'sell':
-            _price = quote['closeBid']
-        else:
-            raise ValueError('Invalid side -- should be \'buy\' or \'sell\'')
-        order = OrderHandler(acc, side, amount, ccy, _price, kind=_type).send_order()
+        _price = quote['closeAsk'] if side == 'buy' else quote['closeBid']
+        order = OrderHandler(acc, 
+                             side, 
+                             amount, 
+                             ccy, 
+                             _price, 
+                             kind='market').send_order()
+
+    elif candles:
+        ccy = candles[0]
+        quotes = GetCandles(acc, ccy, count=500).request()
+        p = ohlc(quotes, symbol=ccy, freq=5)
+        show(p)
+
     elif summary:
         symbols = summary[0].split(',')
         risk = Risk(acc).summary(symbols)

@@ -144,10 +144,7 @@ class OrderHandler(Orders):
         params = {'instrument': self.symbol,
                   'side':       self.side,
                   'type':       self.kind,
-                  'units':      self.quantity,
-                  "price":      self.price,
-                  "upperBound": self.price + 0.00005, # default
-                  "lowerBound": self.price - 0.00005}
+                  'units':      self.quantity}
         return params
 
     def limit_order(self):
@@ -167,7 +164,8 @@ class OrderHandler(Orders):
         try:
             resp = requests.post(self.account.orders, 
                                  headers=self.account.headers, 
-                                 data=params, verify=False).json()
+                                 data=params, 
+                                 verify=False).json()
         except Exception as e:
             print(">>> Error: Caught exception sending order\n%s" % e)
             return False
