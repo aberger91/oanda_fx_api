@@ -1,5 +1,5 @@
 from oanda_fx_api.prices import GetCandles
-from oanda_fx_api.position import Positions, PnL
+from oanda_fx_api.position import PositionHandler, PnL
 from oanda_fx_api.account import Account
 
 
@@ -13,7 +13,7 @@ class Risk:
 
             print(symbol)
             tick = GetCandles(self.acc, symbol, count=1).request().ix[-1]
-            position = Positions(self.acc, symbol).get_position()
+            position = PositionHandler(self.acc, symbol).get_position()
             pnl = PnL(tick, position).get_pnl()
 
             print(position)
