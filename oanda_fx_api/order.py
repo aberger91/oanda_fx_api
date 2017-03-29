@@ -1,6 +1,5 @@
 import requests
 import datetime as dt
-from oanda_fx_api.config import Paths
 
 
 class Orders:
@@ -49,27 +48,7 @@ class Orders:
             raise ValueError(">>> Error: Caught exception updating order: %s" % e)
         return resp
 
-                
-class MostRecentOrder(Orders):
-    def working(self):
-        try:
-            resp = requests.get(self.account.orders,
-                                headers=self.account.headers, 
-                                verify=False).json()
-            return resp
-        except Exception as e:
-            raise ValueError(">>> Caught exception retrieving orders: %s"%e)
-
-    def delete(self):
-        try:
-            resp = requests.request("DELETE", self.account.orders, 
-                                    headers=self.account.headers, verify=False).json()
-            return resp
-        except Exception as e:
-                raise ValueError(">>> Caught exception retrieving orders: %s"%e)
-
-
-class MostRecentReject:
+class Reject(object):
     def __init__(self, order, params):
         self._time =    dt.datetime.now().timestamp()
         self.code =     order["code"]
@@ -86,7 +65,7 @@ class MostRecentReject:
                 self._time, self.params['side'], self.params['price'], self.message)
 
 
-class MostRecentTrade:
+class Trade(object):
     """
     Market Orders --> response from Oanda POST
     Receives and handles the order data
@@ -126,8 +105,9 @@ class MostRecentTrade:
 
 
 class OrderHandler(Orders):
-    def __init__(self, account, side, 
-                 quantity, symbol, price, 
+    def __init__(self, account, 
+                 side, quantity, 
+                 symbol, price, 
                  kind="market", duration=0):
         self.account =  account
         self.side =     side
@@ -175,12 +155,12 @@ class OrderHandler(Orders):
         order, params = self._send_order()
         if order:
             if "tradeOpened" in order.keys():
-                order = MostRecentTrade(order)
+                order = Trade(order)
             elif "orderOpened" in order.keys():
-                order = MostRecentOrder(self.account, order)
+                order = Orders(self.account, order)
             elif "code" in order.keys():
                 if order["code"] in [22, 23]:
-                    order = MostRecentReject(order, params)
+                    order = Reject(order, params)
                     print(order)
                 else:
                     print(order)
