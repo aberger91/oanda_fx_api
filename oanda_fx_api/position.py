@@ -1,8 +1,7 @@
 import requests
-import numpy as np
 
 
-class PnL:
+class PnL(object):
     def __init__(self, tick, position):
         '''
         '''
@@ -19,7 +18,7 @@ class PnL:
             return (self.bid - self.price) * self.units
 
 
-class MostRecentPosition:
+class Position(object):
     def __init__(self, side, price, units):
         self.side = side
         self.price = price
@@ -27,10 +26,10 @@ class MostRecentPosition:
 
     def __repr__(self):
         return "SIDE: %s PRICE: %s UNITS: %s" % (
-                self.side, np.mean(self.price), self.units)
+                self.side, self.price, self.units)
 
 
-class Positions:
+class PositionHandler(object):
     def __init__(self, account, symbol):
         self.account = account
         self.symbol = symbol
@@ -39,7 +38,9 @@ class Positions:
         params = {'instruments': self.symbol,
                   "accountId": self.account.id}
         try:
-            req = requests.get(self.account.positions + self.symbol, headers=self.account.headers, data=params).json()
+            req = requests.get(self.account.positions + self.symbol, 
+                               headers=self.account.headers, 
+                               data=params).json()
         except Exception as e:
             print(">>> Error returning position\n%s\n%s" % (str(e), req))
             return False
@@ -60,15 +61,15 @@ class Positions:
     def get_position(self):
         position = self._get_position()
         if position:
-            position = MostRecentPosition(position["side"],
-                                          position["price"],
-                                          position["units"])
+            position = Position(position["side"],
+                                position["price"],
+                                position["units"])
             return position
         else:
-            return MostRecentPosition(0, 0, 0)
+            return Position(0, 0, 0)
 
 
-class MostRecentExit:
+class ExitPosition(object):
     def __init__(self, position, side, profit_loss):
         self.id =           ("-").join([str(x) for x in position["ids"]])
         self.instrument =   position["instrument"]
@@ -78,19 +79,20 @@ class MostRecentExit:
         self.side =         side
 
 
-class ExitPosition:
+class ExitPositionHandler:
     def __init__(self, account):
         self.account = account
 
     def _close_position(self, symbol):
         try:
-            req = requests.delete(self.account.positions + self.symbol, headers=self.account.headers).json()
+            req = requests.delete(self.account.positions + self.symbol, 
+                                  headers=self.account.headers).json()
         except Exception as e:
             print('Unable to delete positions: \n', str(e))
             return req
         try:
             order = {'ids': req['ids'], 'instrument': req['instrument'],
-                         'units': req['totalUnits'], 'price': req['price']}
+                     'units': req['totalUnits'], 'price': req['price']}
             return order
         except Exception as e:
             print('Caught exception closing positions: \n%s\n%s'%(str(e), req))
@@ -99,9 +101,9 @@ class ExitPosition:
     def close_position(self, position, profit_loss):
         exit = self._close_position("EUR_USD")
         if exit["units"] != 0:
-            exit = MostRecentExit(exit,
-                                  position.side,
-                                  profit_loss)
+            exit = ExitPosition(exit,
+                                position.side,
+                                profit_loss)
             return exit
         else:
             print(">>> No positions removed\n(%s)" % position)
